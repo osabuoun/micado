@@ -69,6 +69,10 @@ write_files:
         regex:         '(.*)'
         target_label:  'group'
         replacement:   '$1'
+    - job_name: job_queuer
+      scrape_interval: 5s
+      static_configs:
+        - targets: ['172.31.0.1:9102']
     alerting:
       alertmanagers:
       - scheme: http
@@ -85,14 +89,14 @@ write_files:
     worker_hdd_utilization = sum(node_filesystem_free{job="worker_cluster",mountpoint="/", device="rootfs"}) / sum(node_filesystem_size{job="worker_cluster",mountpoint="/", device="rootfs"}) *100
         
         ALERT worker_overloaded
-          IF worker_cpu_utilization > 60
+          IF worker_cpu_utilization > 80
           FOR 1m
           LABELS {alert="overloaded", cluster="worker_cluster", node="worker", infra_id="micado_worker_infra", type="VM"}
           ANNOTATIONS {
           summary = "Application cluster overloaded"}
         
         ALERT worker_underloaded
-          IF worker_cpu_utilization < 20
+          IF worker_cpu_utilization < 10
           FOR 2m
           LABELS {alert="underloaded", cluster="worker_cluster", node="worker", infra_id="micado_worker_infra", type="VM"}
           ANNOTATIONS {
@@ -338,5 +342,5 @@ runcmd:
   - docker run -d --name MYSQL_DATABASE -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dataavenue -e MYSQL_USER=da -e MYSQL_PASSWORD=da -p 3306:3306 mysql/mysql-server:5.5
   - docker run -d -v /etc/prometheus/:/etc/prometheus micado/alert_generator:1.0
  # - docker run -d -p 3000:3000 grafana/grafana
-  - curl -o jqueuer_orchestrator_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/docker-compose-orchestrator.yml?token=AfFddVhTIc0fSm0ZAnlUBmVxI8hSvwByks5aMpp8wA%3D%3D
+  - curl -o jqueuer_orchestrator_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/docker-compose-orchestrator.yml
   - docker stack deploy --compose-file jqueuer_orchestrator_compose.yml jqueuer_stack
