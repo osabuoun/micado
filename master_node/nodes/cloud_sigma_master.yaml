@@ -320,6 +320,7 @@ runcmd:
   - chmod +x /usr/local/bin/docker-compose
 # Start Swarm
   - docker swarm init --advertise-addr=$IP
+  - docker network create --driver overlay --subnet 172.31.0.0/24 --gateway 172.31.0.254 --attachable jef-network
   - docker node update --availability drain $(hostname)
 # update executor IP
   - export IP=$(hostname -I | cut -d\  -f1)
@@ -333,7 +334,6 @@ runcmd:
   - docker-compose -f /etc/micado/docker-compose.yml up -d
   - chmod 777 /etc/prometheus_executor/conf.sh
   - chmod 777 /etc/prometheus/alert_generator.sh
-  - docker network create -d bridge my-net --subnet 172.31.0.0/24
   - docker run -d --network=my-net --ip="172.31.0.2" -p 9090:9090 -v /etc/:/etc prom/prometheus:v1.8.0
   - docker run -d --network=my-net --ip="172.31.0.3" -v /etc/alertmanager/:/etc/alertmanager/ -p 9093:9093 prom/alertmanager
   - docker run -d --network=my-net --ip="172.31.0.4" -p 9095:9095 -v /etc/prometheus_executor/:/etc/prometheus_executor micado/prometheus_executor
@@ -343,4 +343,4 @@ runcmd:
   - docker run -d -v /etc/prometheus/:/etc/prometheus micado/alert_generator:1.0
  # - docker run -d -p 3000:3000 grafana/grafana
   - curl -o jqueuer_orchestrator_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/docker-compose-orchestrator.yml
-  - docker stack deploy --compose-file jqueuer_orchestrator_compose.yml jqueuer_stack
+  - docker-compose --file jqueuer_orchestrator_compose.yml up
