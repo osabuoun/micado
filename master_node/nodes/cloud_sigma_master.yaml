@@ -308,10 +308,9 @@ runcmd:
   - apt-get update
   - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget unzip jq dnsmasq
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  - apt-key fingerprint 0EBFCD88
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
-  - apt-get install -y docker-ce
+  - apt-get install -y docker-ce=17.06.0~ce-0~ubuntu
   - export IP=$(hostname -I | cut -d\  -f1)
   - sed -i -e "s/-H fd:\/\//-H fd:\/\/ -H tcp:\/\/$IP:2375/g" /lib/systemd/system/docker.service
   - systemctl daemon-reload
@@ -322,7 +321,10 @@ runcmd:
 # Start Swarm
   - docker swarm init --advertise-addr=$IP
   - docker network create --driver overlay --subnet 172.31.1.0/24 --gateway 172.31.1.1 --attachable jef_network
-  - docker node update --availability drain $(hostname)
+#Start JEF
+  - curl -o jef_docker_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/jef_docker_compose.yml
+  - docker-compose --file jef_docker_compose.yml up -d
+# Drain the node
 # update executor IP
   - export IP=$(hostname -I | cut -d\  -f1)
   - sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus_executor/conf.sh
@@ -344,6 +346,4 @@ runcmd:
   - docker run -d --name MYSQL_DATABASE -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dataavenue -e MYSQL_USER=da -e MYSQL_PASSWORD=da -p 3306:3306 mysql/mysql-server:5.5
   - docker run -d -v /etc/prometheus/:/etc/prometheus micado/alert_generator:1.0
  # - docker run -d -p 3000:3000 grafana/grafana
-#Start JEF
-  - curl -o jqueuer_orchestrator_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/jef_docker_compose.yml
-  - docker-compose --file jef_docker_compose.yml up
+  - docker node update --availability drain $(hostname)
