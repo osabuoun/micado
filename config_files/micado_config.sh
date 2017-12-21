@@ -1,6 +1,7 @@
 #!/bin/bash
 
 curl -o /bin/consul-set-network.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul-set-network.sh
+chmod 755 /bin/consul-set-network.sh
 curl -o /etc/consul/config.json https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/config.json
 curl -o /etc/prometheus/prometheus.yml https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.yml
 curl -o /etc/prometheus/prometheus.rules https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.rules
