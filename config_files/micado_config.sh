@@ -24,7 +24,7 @@ resolvconf -u
 echo nameserver 8.8.8.8 >> /etc/resolv.conf
 sudo dhclient
 /bin/configure_hostname.sh
-
+/bin/install_docker.sh
 #download config files
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus_executor/executor_config.sh --create-dirs -o /etc/prometheus_executor/conf.sh
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/consul_checks.json --create-dirs -o /etc/consul/checks.json
