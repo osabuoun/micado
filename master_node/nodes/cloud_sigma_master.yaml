@@ -5,7 +5,6 @@ manage_etc_hosts: false
 package_update: false
 package_upgrade: false
 
-
 write_files:
 #USER DATA
 - path: /var/lib/micado/occopus/temp_user_data.yaml
@@ -33,72 +32,10 @@ write_files:
                         conf: dhcp
 
       scaling:
-        min: 2
-        max: 10
+        min: 1
+        max: 3
 
 runcmd:
-  - adduser --disabled-password --gecos "" prometheus
-  - /bin/consul-set-network.sh
-  - sudo dhclient
-  - oldhostname=$(hostname -s)
-  - new_host_name=master-$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-  - echo $new_host_name > /etc/hostname
-  - hostname -F /etc/hostname
-  - line=127.0.1.1'\t'$new_host_name
-  - sed -i "s/$oldhostname/$new_host_name/g" /etc/hosts
-  - echo $line >> /etc/hosts
-  - export DEBIAN_FRONTEND=noninteractive 
-  - dpkg-reconfigure openssh-server
-  - resolvconf -u
-  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
-#download config files
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/executor_config.sh --create-dirs -o /etc/prometheus_executor/conf.sh
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul_checks.json --create-dirs -o /etc/consul/checks.json
-#change health check ip address for host ip
-  - sed -i 's/healthcheck_ip_change/'$(hostname --ip-address)'/g' /etc/consul/*
-# Docker install
-  - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget unzip jq dnsmasq
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  - apt-get update
-  - apt-get install -y docker-ce=17.06.0~ce-0~ubuntu
-  - export IP=$(hostname -I | cut -d\  -f1)
-  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ -H tcp:\/\/$IP:2375/g" /lib/systemd/system/docker.service
-  - systemctl daemon-reload
-  - service docker restart
-# Install Docker Compose
-  - curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-  - chmod +x /usr/local/bin/docker-compose
-# Start Swarm
-  - docker swarm init --advertise-addr=$IP
-  - docker network create --driver overlay --subnet 172.31.1.0/24 --gateway 172.31.1.1 --attachable jef_network
-#Start JEF
-  - curl -o jef_docker_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/jef_docker_compose.yml
-  - curl -o celeryconfig.py https://raw.githubusercontent.com/osabuoun/jqueuer/master/celeryconfig.py 
-  - curl -o flowerconfig.py https://raw.githubusercontent.com/osabuoun/jqueuer/master/flowerconfig.py 
-  - docker-compose --file jef_docker_compose.yml up -d
-# Drain the node
-# update executor IP
-  - export IP=$(hostname -I | cut -d\  -f1)
-  - sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus_executor/conf.sh
-  - sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus/alert_generator.sh
-#Start infra. services
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/templates/temp_auth_data.yaml --create-dirs -o /var/lib/micado/occopus/temp_auth_data.yaml
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/templates/temp_node_definitions.yaml --create-dirs -o /var/lib/micado/occopus/temp_node_definitions.yaml
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/infrastructure_descriptor.yaml  --create-dirs -o /var/lib/micado/occopus/temp_infrastructure_descriptor.yaml
-  - curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/nodes/cloud_init_worker.yaml --create-dirs -o /etc/micado/occopus/nodes/cloud_init_worker.yaml
-  - docker-compose -f /etc/micado/docker-compose.yml up -d
-  - chmod 777 /etc/prometheus_executor/conf.sh
-  - chmod 777 /etc/prometheus/alert_generator.sh
-  - docker network create -d bridge my-net --subnet 172.31.0.0/24
-  - docker run -d --network=my-net --ip="172.31.0.2" -p 9090:9090 -v /etc/:/etc prom/prometheus:v1.8.0
-  - docker run -d --network=my-net --ip="172.31.0.3" -v /etc/alertmanager/:/etc/alertmanager/ -p 9093:9093 prom/alertmanager
-  - docker run -d --network=my-net --ip="172.31.0.4" -p 9095:9095 -v /etc/prometheus_executor/:/etc/prometheus_executor micado/prometheus_executor
-  - export IP=$(hostname -I | cut -d\  -f1)
-  - docker run -d --network=my-net --ip="172.31.0.5" -p 8301:8301 -p 8301:8301/udp -p 8300:8300 -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 8600:8600/udp  -v /etc/consul/:/etc/consul  -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt":true}'  consul agent -server -client=0.0.0.0 -advertise=$IP -bootstrap=true -ui -config-dir=/etc/consul
-  - docker run -d --name MYSQL_DATABASE -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dataavenue -e MYSQL_USER=da -e MYSQL_PASSWORD=da -p 3306:3306 mysql/mysql-server:5.5
-  - docker run -d -v /etc/prometheus/:/etc/prometheus micado/alert_generator:1.0
- # - docker run -d -p 3000:3000 grafana/grafana
-  - docker node update --availability drain $(hostname)
-
+  - curl /bin/micado_config.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/micado_config.sh
+  - chmod a+x /bin/micado_config.sh
+  - /bin/micado_config.sh
