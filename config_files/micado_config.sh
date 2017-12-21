@@ -1,20 +1,20 @@
 #!/bin/bash
 
-curl -o /bin/consul-set-network.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/consul-set-network.sh
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/consul-set-network.sh --create-dirs -o /bin/consul-set-network.sh
 chmod 755 /bin/consul-set-network.sh
-curl -o /bin/configure_hostname.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/configure_hostname.sh
+curl -o /bin/configure_hostname.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/configure_hostname.sh --create-dirs
 chmod 755 /bin/configure_hostname.sh
-curl -o /bin/install_docker.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/install_docker.sh
+curl -o /bin/install_docker.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/install_docker.sh --create-dirs
 chmod 755 /bin/install_docker.sh
 
-curl -o /etc/consul/config.json https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/config.json
-curl -o /etc/prometheus/prometheus.yml https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.yml
-curl -o /etc/prometheus/prometheus.rules https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.rules
-curl -o /etc/prometheus/alert_generator.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/alert_generator.sh
-curl -o /etc/alertmanager/config.yml https://raw.githubusercontent.com/osabuoun/micado/master/config_files/alertmanager/config.yml
-curl -o /etc/prometheus_executor/conf.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus_executor/conf.sh
-curl -o /etc/resolvconf/resolv.conf.d/base https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/resolv.conf.d_base
-curl -o /etc/micado/docker-compose.yml https://raw.githubusercontent.com/osabuoun/micado/master/config_files/docker-compose.yml
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/config.json --create-dirs -o /etc/consul/config.json 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.yml --create-dirs -o /etc/prometheus/prometheus.yml
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.rules --create-dirs -o /etc/prometheus/prometheus.rules 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/alert_generator.sh --create-dirs -o /etc/prometheus/alert_generator.sh 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/alertmanager/config.yml --create-dirs -o /etc/alertmanager/config.yml 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus_executor/conf.sh --create-dirs -o /etc/prometheus_executor/conf.sh 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/resolv.conf.d_base --create-dirs -o /etc/resolvconf/resolv.conf.d/base 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/docker-compose.yml --create-dirs -o /etc/micado/docker-compose.yml
 
 
 adduser --disabled-password --gecos "" prometheus
