@@ -1,0 +1,25 @@
+user_data:
+  auth_data:
+    type: cloudsigma
+    email: o.abuoun@westminster.ac.uk
+    password: 5BDVH2WM2017
+
+  resource:
+    type: cloudsigma
+    endpoint: https://zrh.cloudsigma.com/api/2.0
+    libdrive_id:  74655f92-b7bb-4084-b4ec-fdbe46d576ca 
+    description:
+        cpu: 2000
+        mem: 2073741824
+        vnc_password: secret
+        pubkeys:
+            -
+                be3e3476-3f9c-4dea-9f2a-fbef32448609
+        nics:
+            -
+                 ip_v4_conf:
+                    conf: dhcp
+
+  scaling:
+    min: 1
+    max: 3
