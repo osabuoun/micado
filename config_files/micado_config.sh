@@ -10,12 +10,18 @@ chmod 755 /bin/install_docker.sh
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/config.json --create-dirs -o /etc/consul/config.json 
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.yml --create-dirs -o /etc/prometheus/prometheus.yml
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/prometheus.rules --create-dirs -o /etc/prometheus/prometheus.rules 
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/alertmanager_config.yml --create-dirs -o /etc/alertmanager/config.yml 
+
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus/alert_generator.sh --create-dirs -o /etc/prometheus/alert_generator.sh 
-curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/alertmanager/config.yml --create-dirs -o /etc/alertmanager/config.yml 
+chmod 777 /etc/prometheus/alert_generator.sh
+
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus_executor/conf.sh --create-dirs -o /etc/prometheus_executor/conf.sh 
+chmod 777 /etc/prometheus_executor/conf.sh
+
+curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/consul_checks.json --create-dirs -o /etc/consul/checks.json
+
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/misc/resolv.conf.d_base --create-dirs -o /etc/resolvconf/resolv.conf.d/base 
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/docker-compose.yml --create-dirs -o /etc/micado/docker-compose.yml
-
 
 adduser --disabled-password --gecos "" prometheus
 ./bin/consul-set-network.sh
@@ -25,35 +31,32 @@ resolvconf -u
 echo nameserver 8.8.8.8 >> /etc/resolv.conf
 sudo dhclient
 ./bin/configure_hostname.sh
-./bin/install_docker.sh
-#download config files
-curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/prometheus_executor/executor_config.sh --create-dirs -o /etc/prometheus_executor/conf.sh
-curl -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/consul/consul_checks.json --create-dirs -o /etc/consul/checks.json
 
-#change health check ip address for host ip
+# update executor IP
+export IP=$(hostname -I | cut -d\  -f1)
+sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus_executor/conf.sh
+sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus/alert_generator.sh
+# change health check ip address for host ip
 sed -i 's/healthcheck_ip_change/'$(hostname --ip-address)'/g' /etc/consul/*
+
+./bin/install_docker.sh
 
 # Start Swarm
 docker swarm init --advertise-addr=$IP
 docker network create --driver overlay --subnet 172.31.1.0/24 --gateway 172.31.1.1 --attachable jef_network
 
-#Start JEF
+#Init & Start JEF
 curl -o jef_docker_compose.yml https://raw.githubusercontent.com/osabuoun/jqueuer/master/jef_docker_compose.yml
 curl -o celeryconfig.py https://raw.githubusercontent.com/osabuoun/jqueuer/master/celeryconfig.py 
 curl -o flowerconfig.py https://raw.githubusercontent.com/osabuoun/jqueuer/master/flowerconfig.py 
 docker-compose --file jef_docker_compose.yml up -d
-# update executor IP
-export IP=$(hostname -I | cut -d\  -f1)
-sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus_executor/conf.sh
-sed -i -e 's/hostIP/'$IP'/g' /etc/prometheus/alert_generator.sh
+
 #Start infra. services
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/templates/temp_auth_data.yaml --create-dirs -o /var/lib/micado/occopus/temp_auth_data.yaml
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/templates/temp_node_definitions.yaml --create-dirs -o /var/lib/micado/occopus/temp_node_definitions.yaml
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/infrastructure_descriptor.yaml  --create-dirs -o /var/lib/micado/occopus/temp_infrastructure_descriptor.yaml
 curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/nodes/cloud_init_worker.yaml --create-dirs -o /etc/micado/occopus/nodes/cloud_init_worker.yaml
 docker-compose -f /etc/micado/docker-compose.yml up -d
-chmod 777 /etc/prometheus_executor/conf.sh
-chmod 777 /etc/prometheus/alert_generator.sh
 docker network create -d bridge my-net --subnet 172.31.0.0/24
 docker run -d --network=my-net --ip="172.31.0.2" -p 9090:9090 -v /etc/:/etc prom/prometheus:v1.8.0
 docker run -d --network=my-net --ip="172.31.0.3" -v /etc/alertmanager/:/etc/alertmanager/ -p 9093:9093 prom/alertmanager

@@ -25,27 +25,27 @@ for i in $(seq 0 $nmbservices); do
 
   #create new rules
   if [ -n "$name" ]; then
-  if grep -q $name "/etc/prometheus/prometheus.rules"; then
-      echo "already exists"     
-  else
-      echo "create new rule named $name " 
+    if grep -q $name "/etc/prometheus/prometheus.rules"; then
+        echo "already exists"     
+    else
+        echo "create new rule named $name " 
 
-      echo "ALERT $name"_overloaded"
-      IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=$namequotes }[30s]))*100 > $cpulimit
-      FOR 30s
-      LABELS {alert="'"overloaded"'", type="'"docker"'", application=$namequotes}
-      ANNOTATIONS {
-      summary = "'"overloaded"'"}
+        echo "ALERT $name"_overloaded"
+        IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=$namequotes }[30s]))*100 > $cpulimit
+        FOR 30s
+        LABELS {alert="'"overloaded"'", type="'"docker"'", application=$namequotes}
+        ANNOTATIONS {
+        summary = "'"overloaded"'"}
 
-      ALERT $name"_underloaded"
-      IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=$namequotes }[30s]))*100 < 20
-      FOR 30s
-      LABELS {alert="'"underloaded"'", type="'"docker"'", application=$namequotes}
-      ANNOTATIONS {
-      summary = "'"underloaded"'"}" >> /etc/prometheus/prometheus.rules
+        ALERT $name"_underloaded"
+        IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=$namequotes }[30s]))*100 < 20
+        FOR 30s
+        LABELS {alert="'"underloaded"'", type="'"docker"'", application=$namequotes}
+        ANNOTATIONS {
+        summary = "'"underloaded"'"}" >> /etc/prometheus/prometheus.rules
+    fi
   fi
-  fi
-  done
+done
 
 
 
