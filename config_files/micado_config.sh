@@ -59,11 +59,11 @@ curl -L https://raw.githubusercontent.com/osabuoun/micado/master/worker_node/nod
 docker-compose -f /etc/micado/docker-compose.yml up -d
 docker network create -d bridge my-net --subnet 172.31.0.0/24
 docker run -d --network=my-net --ip="172.31.0.2" -p 9090:9090 -v /etc/:/etc prom/prometheus:v1.8.0
-docker run -d --network=my-net --ip="172.31.0.3" -v /etc/alertmanager/:/etc/alertmanager/ -p 9093:9093 prom/alertmanager
+docker run -d --network=my-net --ip="172.31.0.3" -p 9093:9093 -v /etc/alertmanager/:/etc/alertmanager/  prom/alertmanager
 docker run -d --network=my-net --ip="172.31.0.4" -p 9095:9095 -v /etc/prometheus_executor/:/etc/prometheus_executor micado/prometheus_executor
 export IP=$(hostname -I | cut -d\  -f1)
 docker run -d --network=my-net --ip="172.31.0.5" -p 8301:8301 -p 8301:8301/udp -p 8300:8300 -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 8600:8600/udp  -v /etc/consul/:/etc/consul  -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt":true}'  consul agent -server -client=0.0.0.0 -advertise=$IP -bootstrap=true -ui -config-dir=/etc/consul
-docker run -d --name MYSQL_DATABASE -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dataavenue -e MYSQL_USER=da -e MYSQL_PASSWORD=da -p 3306:3306 mysql/mysql-server:5.5
+docker run -d --name -p 3306:3306 MYSQL_DATABASE -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dataavenue -e MYSQL_USER=da -e MYSQL_PASSWORD=da mysql/mysql-server:5.5
 docker run -d -v /etc/prometheus/:/etc/prometheus micado/alert_generator:1.0
  # - docker run -d -p 3000:3000 grafana/grafana
 # Drain the node

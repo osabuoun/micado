@@ -16,40 +16,43 @@ worker_hdd_utilization = sum(node_filesystem_free{job="worker_cluster",mountpoin
       LABELS {alert="underloaded", cluster="worker_cluster", node="worker", infra_id="micado_worker_infra", type="VM"}
       ANNOTATIONS {
       summary = "Application cluster underloaded"}
-ALERT customer_app3_overloaded
+
+    ALERT customer_app3_overloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app3" }[30s]))*100 > 85
       FOR 30s
       LABELS {alert="overloaded", type="docker", application="customer_app3"}
       ANNOTATIONS {
       summary = "overloaded"}
 
-      ALERT customer_app3_underloaded
+    ALERT customer_app3_underloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app3" }[30s]))*100 < 20
       FOR 30s
       LABELS {alert="underloaded", type="docker", application="customer_app3"}
       ANNOTATIONS {
       summary = "underloaded"}
-ALERT customer_app4_overloaded
+    
+    ALERT customer_app4_overloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app4" }[30s]))*100 > 85
       FOR 30s
       LABELS {alert="overloaded", type="docker", application="customer_app4"}
       ANNOTATIONS {
       summary = "overloaded"}
 
-      ALERT customer_app4_underloaded
+    ALERT customer_app4_underloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app4" }[30s]))*100 < 20
       FOR 30s
       LABELS {alert="underloaded", type="docker", application="customer_app4"}
       ANNOTATIONS {
       summary = "underloaded"}
-ALERT customer_app5_overloaded
+    
+    ALERT customer_app5_overloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app5" }[30s]))*100 > 85
       FOR 30s
       LABELS {alert="overloaded", type="docker", application="customer_app5"}
       ANNOTATIONS {
       summary = "overloaded"}
 
-      ALERT customer_app5_underloaded
+    ALERT customer_app5_underloaded
       IF avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="customer_app5" }[30s]))*100 < 20
       FOR 30s
       LABELS {alert="underloaded", type="docker", application="customer_app5"}
