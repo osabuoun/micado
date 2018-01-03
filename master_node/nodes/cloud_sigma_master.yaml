@@ -18,7 +18,7 @@ write_files:
       resource:
         type: cloudsigma
         endpoint: https://zrh.cloudsigma.com/api/2.0
-        libdrive_id:  74655f92-b7bb-4084-b4ec-fdbe46d576ca 
+        libdrive_id:  e47f39e0-075f-4b38-83e6-1b9dce36d0f1 
         description:
             cpu: 2000
             mem: 2073741824
@@ -36,6 +36,6 @@ write_files:
         max: 3
 
 runcmd:
-  - curl /bin/micado_config.sh https://raw.githubusercontent.com/osabuoun/micado/master/config_files/micado_config.sh
+  - curl -o /bin/micado_config.sh -L https://raw.githubusercontent.com/osabuoun/micado/master/config_files/micado_config.sh
   - chmod a+x /bin/micado_config.sh
   - /bin/micado_config.sh
